@@ -19,6 +19,7 @@ _PRIME = 2**127 - 1
 # 13th Mersenne Prime is 2**521 - 1
 
 _rint = functools.partial(random.SystemRandom().randint, 0)
+#  fucntools allows the variable _rint to be call like a function
 
 
 def _eval_at(poly, x, prime):
@@ -38,11 +39,10 @@ def make_random_shares(minimum, shares, prime=_PRIME):
     Generates a random shamir pool, returns the secret and the share
     points.
     '''
-    if minimum > shares:
-        raise ValueError("pool secret would be irrecoverable")
-    poly = [_rint(prime) for i in range(minimum)]
-    points = [(i, _eval_at(poly, i, prime))
-              for i in range(1, shares + 1)]
+    if minimum > shares: # mininum = threshold
+        raise ValueError("pool secret would be irrecoverable")  # verifying that there are enough shares to meet the threshold
+    poly = [_rint(prime) for i in range(minimum)]  # generates polynomial as a list with randomly generated coefficients, first coef. is secret
+    points = [(i, _eval_at(poly, i, prime)) for i in range(1, shares + 1)]  # generates list of shares in the form [x, f(x)], where x = 1,2,3,...
     return poly[0], points
 
 
@@ -117,5 +117,9 @@ secret, shares = make_random_shares(minimum=3, shares=6)
 
 print('secret and shares:', secret, shares)
 
+# recovers secret with langrange interpolation -> divmod -> extended gcd
 print('secret recovered from minimum subset of shares', recover_secret(shares[:3]))
+
+'''shows that the secret can be recovered with any combination of keys, 
+provided there are more shares than the threshold number'''
 print('secret recovered from a different minimum subset of shares', recover_secret(shares[-3:]))
