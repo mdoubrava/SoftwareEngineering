@@ -19,31 +19,32 @@ _PRIME = 2**127 - 1
 # 13th Mersenne Prime is 2**521 - 1
 
 _rint = functools.partial(random.SystemRandom().randint, 0)
+sample =777
 
-
-def _eval_at(poly, x, prime):
+def eval(polynomial, x, prime):
     '''evaluates polynomial (coefficient tuple) at x, used to generate a
     shamir pool in make_random_shares below.
     '''
-    accum = 0
-    for coeff in reversed(poly):
-        accum *= x
-        accum += coeff
-        accum %= prime
-    return accum
+    total = 0
+    for coefficients in reversed(polynomial):
+        total *= x
+        total += coefficients
+        total %= prime
+    return total
 
 
-def make_random_shares(minimum, shares, prime=_PRIME):
+def random_shares(threshold, shares, prime=_PRIME):
     '''
     Generates a random shamir pool, returns the secret and the share
     points.
     '''
-    if minimum > shares:
-        raise ValueError("pool secret would be irrecoverable")
-    poly = [_rint(prime) for i in range(minimum)]
-    points = [(i, _eval_at(poly, i, prime))
+    if threshold > shares:
+        raise ValueError("The secret message is unrecoverable")
+    polynomial = [_rint(prime) for i in range(threshold - 1)]
+    polynomial = [sample] + polynomial
+    points = [(i, eval(polynomial, i, prime))
               for i in range(1, shares + 1)]
-    return poly[0], points
+    return polynomial[0], points
 
 
 def _extended_gcd(a, b):
@@ -56,15 +57,15 @@ def _extended_gcd(a, b):
     '''
 
     x = 0
-    last_x = 1
+    lastx = 1
     y = 1
-    last_y = 0
+    lasty = 0
     while b != 0:
-        quot = a // b
+        quotient = a // b
         a, b = b,  a%b
-        x, last_x = last_x - quot * x, x
-        y, last_y = last_y - quot * y, y
-    return last_x, last_y
+        x, lastx = lastx - quotient * x, x
+        y, lasty = lasty - quotient * y, y
+    return lastx, lasty
 
 
 def _divmod(num, den, p):
@@ -85,10 +86,10 @@ def _lagrange_interpolate(x, x_s, y_s, p):
     k = len(x_s)
     assert k == len(set(x_s)), "points must be distinct"
     def PI(vals):  # upper-case PI -- product of inputs
-        accum = 1
+        total = 1
         for v in vals:
-            accum *= v
-        return accum
+            total *= v
+        return total
     nums = []  # avoid inexact division
     dens = []
     for i in range(k):
@@ -113,7 +114,7 @@ def recover_secret(shares, prime=_PRIME):
     return _lagrange_interpolate(0, x_s, y_s, prime)
 
 
-secret, shares = make_random_shares(minimum=3, shares=6)
+secret, shares = random_shares(threshold=3, shares=6)
 
 print('secret and shares:', secret, shares)
 
