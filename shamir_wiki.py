@@ -15,11 +15,11 @@ import functools
 # possible to our security level; e.g.  desired security level of 128
 # bits -- too large and all the ciphertext is large; too small and
 # security is compromised)
-_PRIME = 2**127 - 1
+_PRIME = 2**31 - 1  # this is the 8th Mersenne prime
 # 13th Mersenne Prime is 2**521 - 1
 
 _rint = functools.partial(random.SystemRandom().randint, 0)
-sample =777
+sample = 777
 
 def eval(polynomial, x, prime):
     '''evaluates polynomial (coefficient tuple) at x, used to generate a
@@ -31,7 +31,6 @@ def eval(polynomial, x, prime):
         total += coefficients
         total %= prime
     return total
-
 
 def random_shares(threshold, shares, prime=_PRIME):
     '''
@@ -85,21 +84,24 @@ def _lagrange_interpolate(x, x_s, y_s, p):
     '''
     k = len(x_s)
     assert k == len(set(x_s)), "points must be distinct"
+
     def PI(vals):  # upper-case PI -- product of inputs
         total = 1
         for v in vals:
             total *= v
         return total
+
     nums = []  # avoid inexact division
     dens = []
     for i in range(k):
-        others = list(x_s)
-        cur = others.pop(i)
-        nums.append(PI(x - o for o in others))
-        dens.append(PI(cur - o for o in others))
+        others = list(x_s)  # list of x values
+        cur = others.pop(i)  # get singular x value
+        nums.append(PI(x - o for o in others))  # calculates Lagrange numerators
+        dens.append(PI(cur - o for o in others))  # calculate Lagrange denominators
+
     den = PI(dens)
-    num = sum([_divmod(nums[i] * den * y_s[i] % p, dens[i], p)
-               for i in range(k)])
+    num = sum([_divmod(nums[i] * den * y_s[i] % p, dens[i], p) for i in range(k)])
+
     return (_divmod(num, den, p) + p) % p
 
 
