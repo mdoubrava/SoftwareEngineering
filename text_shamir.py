@@ -10,7 +10,7 @@ def text_to_ascii(text):
         ascii_char = str(ord(c))
         ascii_string = ascii_string + ascii_char
         digits_per_c.append(len(ascii_char))
-    return ascii_string, digits_per_c
+    return int(ascii_string), digits_per_c
 
 ''' Converts concatenated ascii integer to text
 using a list of the # of digits for each integer.
@@ -28,6 +28,7 @@ def ascii_to_text(num, digits):
 
 secret = "Ah ha"
 secret, digits = text_to_ascii(secret)
+print type(secret)
 print (secret)
 print (digits)
 
