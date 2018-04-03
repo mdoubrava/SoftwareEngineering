@@ -28,7 +28,7 @@ def ascii_to_text(num, digits):
 
 secret = "Ah ha"
 secret, digits = text_to_ascii(secret)
-print type(secret)
+print (type(secret))
 print (secret)
 print (digits)
 
