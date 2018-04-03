@@ -10,13 +10,9 @@ from __future__ import division
 import random
 import functools
 
-# 12th Mersenne Prime
-# (for this application we want a known prime number as close as
-# possible to our security level; e.g.  desired security level of 128
-# bits -- too large and all the ciphertext is large; too small and
-# security is compromised)
+
 _PRIME = 2**31 - 1  # this is the 8th Mersenne prime
-# 13th Mersenne Prime is 2**521 - 1
+
 
 _rint = functools.partial(random.SystemRandom().randint, 0)
 secret = "abc"
@@ -155,4 +151,4 @@ print('secret recovered from minimum subset of shares', recover_secret(shares[:3
 print('secret recovered from a different minimum subset of shares', recover_secret(shares[-3:]))
 
 secret = recover_secret(shares[:3])
-print("secret converted back to text", ascii_to_text(secret, digits))
+print("secret converted back to text:", ascii_to_text(secret, digits))
